@@ -2,7 +2,7 @@ const http = require("http");
 const Client = require("socket.io-client");
 const request = require("supertest");
 const app = require("../src/app");
-const { initializeSocket } = require("../src/socket/socket");
+const { initializeSocket, getIO } = require("../src/socket/socket");
 const { connectTestDB, clearTestDB, closeTestDB } = require("./setup/testDb");
 
 let httpServer;
@@ -22,7 +22,7 @@ afterEach(async () => {
 
 afterAll(async () => {
     await closeTestDB();
-    await new Promise((resolve) => httpServer.close(resolve));
+    await new Promise((resolve) => getIO().close(resolve));
 });
 
 async function registerAndGetCookie(role, emailPrefix, extra = {}) {

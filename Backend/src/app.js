@@ -24,12 +24,14 @@ const healthRouter = require('./routes/health.routes');
 const jobRouter = require('./routes/job.routes');
 const applicationRouter = require('./routes/application.routes');
 const resumeRouter = require('./routes/resume.routes');
+const dsaRouter = require('./routes/dsa.routes');
 
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/jobs', jobRouter);
 app.use('/api/applications', applicationRouter);
 app.use('/api/resume', resumeRouter);
+app.use('/api/dsa', dsaRouter);
 
 const ApiError = require('./utils/ApiError');
 app.use((req, res, next) => {
