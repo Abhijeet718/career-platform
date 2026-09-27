@@ -3,10 +3,10 @@ const jobModel = require('../models/job.model');
 const userModel = require('../models/user.model');
 const { computeSkillMatch } = require('../services/matching.service');
 const { emitToUser } = require('../socket/socket');
+const { applicantFilterQuerySchema } = require('../validators/application.validator');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
-
 
 const applyToJobController = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -72,17 +72,49 @@ const getApplicantsForJobController = asyncHandler(async (req, res) => {
         throw new ApiError(404, 'Job not found');
     }
 
-    const page = Math.max(parseInt(req.query.page) || 1, 1);
-    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    const parsedQuery = applicantFilterQuerySchema.safeParse(req.query);
+    if (!parsedQuery.success) {
+        const errors = parsedQuery.error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message
+        }));
+        throw new ApiError(400, 'Invalid query parameters', errors);
+    }
+
+    const { status, search, minMatchScore, sortBy, sortOrder, page, limit } = parsedQuery.data;
     const skip = (page - 1) * limit;
 
+    const filter = { job: jobId };
+    if (status) filter.status = status;
+    if (minMatchScore !== undefined) filter.matchScore = { $gte: minMatchScore };
+
+    if (search) {
+        const searchRegex = new RegExp(search, 'i');
+        const matchingApplicantIds = await userModel.find({
+            role: 'student',
+            $or: [{ username: searchRegex }, { skills: searchRegex }]
+        }).distinct('_id');
+
+        if (matchingApplicantIds.length === 0) {
+            return res.status(200).json(
+                new ApiResponse(200, {
+                    applications: [],
+                    pagination: { page, limit, total: 0, totalPages: 0 }
+                }, 'Applicants fetched successfully')
+            );
+        }
+        filter.applicant = { $in: matchingApplicantIds };
+    }
+
+    const sortObj = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+
     const [applications, total] = await Promise.all([
-        applicationModel.find({ job: jobId })
-            .sort({ matchScore: -1, createdAt: -1 })
+        applicationModel.find(filter)
+            .sort(sortObj)
             .skip(skip)
             .limit(limit)
             .populate('applicant', 'username email skills'),
-        applicationModel.countDocuments({ job: jobId })
+        applicationModel.countDocuments(filter)
     ]);
 
     return res.status(200).json(
@@ -106,7 +138,7 @@ const updateApplicationStatusController = asyncHandler(async (req, res) => {
         throw new ApiError(404, 'Application not found');
     }
 
-       application.status = status;
+    application.status = status;
     await application.save();
 
     emitToUser(application.applicant.toString(), 'applicationStatusUpdated', {

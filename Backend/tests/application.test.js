@@ -149,6 +149,146 @@ describe("GET /api/jobs/:jobId/applicants (IDOR protection)", () => {
         expect(res.body.data.applications[0].matchScore).toBe(100);
         expect(res.body.data.applications[0].applicant.username).toBe("astu6_user");
     });
+
+    test("filters applicants by status", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter1", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const studentACookie = await registerAndGetCookie("student", "filtA");
+        const studentBCookie = await registerAndGetCookie("student", "filtB");
+
+        const applyA = await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", studentACookie);
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", studentBCookie);
+
+        await request(app)
+            .patch(`/api/applications/${applyA.body.data.application._id}/status`)
+            .set("Cookie", recruiterCookie)
+            .send({ status: "shortlisted" });
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?status=shortlisted`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.applications).toHaveLength(1);
+        expect(res.body.data.applications[0].applicant.username).toBe("filtA_user");
+    });
+
+    test("filters applicants by minMatchScore", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter2", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const highMatchCookie = await registerAndGetCookie("student", "highMatch");
+        await request(app).patch("/api/auth/profile").set("Cookie", highMatchCookie)
+            .send({ skills: ["Node.js", "MongoDB", "Docker", "AWS"] });
+
+        const lowMatchCookie = await registerAndGetCookie("student", "lowMatch");
+        await request(app).patch("/api/auth/profile").set("Cookie", lowMatchCookie)
+            .send({ skills: ["Node.js"] });
+
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", highMatchCookie);
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", lowMatchCookie);
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?minMatchScore=50`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.applications).toHaveLength(1);
+        expect(res.body.data.applications[0].applicant.username).toBe("highMatch_user");
+    });
+
+    test("searches applicants by username", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter3", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const priyaCookie = await registerAndGetCookie("student", "priyaSharma");
+        const rahulCookie = await registerAndGetCookie("student", "rahulVerma");
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", priyaCookie);
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", rahulCookie);
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?search=priya`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.applications).toHaveLength(1);
+        expect(res.body.data.applications[0].applicant.username).toBe("priyaSharma_user");
+    });
+
+    test("searches applicants by skill", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter4", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const kubernetesStudentCookie = await registerAndGetCookie("student", "kubeStudent");
+        await request(app).patch("/api/auth/profile").set("Cookie", kubernetesStudentCookie)
+            .send({ skills: ["kubernetes", "node.js"] });
+
+        const otherStudentCookie = await registerAndGetCookie("student", "otherStudent");
+        await request(app).patch("/api/auth/profile").set("Cookie", otherStudentCookie)
+            .send({ skills: ["python"] });
+
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", kubernetesStudentCookie);
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", otherStudentCookie);
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?search=kubernetes`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.applications).toHaveLength(1);
+        expect(res.body.data.applications[0].applicant.username).toBe("kubeStudent_user");
+    });
+
+    test("returns an empty list (not an error) when search matches no one", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter5", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?search=nonexistentname`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.applications).toHaveLength(0);
+        expect(res.body.data.pagination.total).toBe(0);
+    });
+
+    test("sorts by createdAt ascending when requested", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter6", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const firstCookie = await registerAndGetCookie("student", "firstApplicant");
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", firstCookie);
+
+        const secondCookie = await registerAndGetCookie("student", "secondApplicant");
+        await request(app).post(`/api/jobs/${jobId}/apply`).set("Cookie", secondCookie);
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?sortBy=createdAt&sortOrder=asc`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(200);
+        expect(res.body.data.applications[0].applicant.username).toBe("firstApplicant_user");
+        expect(res.body.data.applications[1].applicant.username).toBe("secondApplicant_user");
+    });
+
+    test("rejects an invalid status filter value", async () => {
+        const recruiterCookie = await registerAndGetCookie("recruiter", "arecFilter7", { companyName: "X" });
+        const jobRes = await request(app).post("/api/jobs").set("Cookie", recruiterCookie).send(validJob);
+        const jobId = jobRes.body.data.job._id;
+
+        const res = await request(app)
+            .get(`/api/jobs/${jobId}/applicants?status=not_a_real_status`)
+            .set("Cookie", recruiterCookie);
+
+        expect(res.status).toBe(400);
+    });
 });
 
 describe("PATCH /api/applications/:applicationId/status (IDOR protection)", () => {
