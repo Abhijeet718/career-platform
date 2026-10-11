@@ -7,6 +7,7 @@ import JobDetail from "./features/student/pages/JobDetail";
 import ApplicantsView from "./features/recruiter/pages/ApplicantsView";
 import MyApplications from "./features/student/pages/MyApplications";
 import Profile from "./features/student/pages/Profile";
+import DsaTracker from "./features/dsa/pages/DsaTracker";
 
 export const router = createBrowserRouter([
     {
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
     {
         path: "/profile",
         element: <Protected allowedRoles={['student']}><Profile /></Protected>
+    },
+    {
+        path: "/dsa",
+        element: <Protected><DsaTracker /></Protected>
     },
     {
         path: "/recruiter/jobs/:jobId/applicants",
