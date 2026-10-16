@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { FiTrash2 } from 'react-icons/fi'
 import { createDsaEntry, getMyDsaEntries, updateDsaEntry, deleteDsaEntry, getDsaStats } from '../services/dsa.api'
 import { useToast } from '../../../shared/ToastContext'
 import '../../student/jobs.scss'
@@ -121,8 +122,13 @@ const DsaTracker = () => {
     const maxTopicCount = stats ? Math.max(1, ...stats.topicBreakdown.map((t) => t.solved)) : 1
 
     return (
-        <main className="jobs-page dsa-page">
-            <h1>DSA Tracker</h1>
+        <main className="page-shell dsa-page">
+            <div className="page-shell__header">
+                <h1>DSA Tracker</h1>
+                <button className="button primary-button" onClick={() => setShowForm(!showForm)}>
+                    {showForm ? 'Cancel' : '+ Log Problem'}
+                </button>
+            </div>
 
             {stats && (
                 <section className="dsa-stats">
@@ -132,7 +138,7 @@ const DsaTracker = () => {
                             <span className="dsa-stat-card__label">Problems Solved</span>
                         </div>
                         <div className="dsa-stat-card">
-                            <span className="dsa-stat-card__value">🔥 {stats.currentStreak}</span>
+                            <span className="dsa-stat-card__value">{stats.currentStreak}</span>
                             <span className="dsa-stat-card__label">Day Streak</span>
                         </div>
                     </div>
@@ -165,13 +171,6 @@ const DsaTracker = () => {
                     </div>
                 </section>
             )}
-
-            <div className="recruiter-header">
-                <h2>Your Problems</h2>
-                <button className="button primary-button" onClick={() => setShowForm(!showForm)}>
-                    {showForm ? 'Cancel' : '+ Log Problem'}
-                </button>
-            </div>
 
             {showForm && (
                 <form className="post-job-form" onSubmit={handleCreate}>
@@ -228,8 +227,8 @@ const DsaTracker = () => {
                 </select>
             </div>
 
-            {loading && entries.length === 0 && <p>Loading...</p>}
-            {!loading && entries.length === 0 && <p className="jobs-empty">No problems logged yet — add your first one above.</p>}
+            {loading && entries.length === 0 && <p className="loading-state">Loading...</p>}
+            {!loading && entries.length === 0 && <p className="empty-state">No problems logged yet — add your first one above.</p>}
 
             <div className="dsa-entries-list">
                 {entries.map((entry) => (
@@ -246,7 +245,9 @@ const DsaTracker = () => {
                             <select value={entry.status} onChange={(e) => handleStatusChange(entry._id, e.target.value)}>
                                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                             </select>
-                            <button className="dsa-entry-card__delete" onClick={() => handleDelete(entry._id)}>Delete</button>
+                            <button className="dsa-entry-card__delete" onClick={() => handleDelete(entry._id)} aria-label="Delete entry">
+                                <FiTrash2 size={14} />
+                            </button>
                         </div>
                     </div>
                 ))}
