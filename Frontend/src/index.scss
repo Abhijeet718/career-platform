@@ -1,3 +1,43 @@
+:root {
+    --bg-base: #11141a;
+    --bg-surface: #1a1f29;
+    --bg-surface-raised: #222838;
+    --border: #2d3444;
+    --border-hover: #3a4254;
+
+    --text-primary: #e8ebf0;
+    --text-muted: #8891a3;
+    --text-faint: #5b6478;
+
+    --accent-action: #ff3366;
+    --accent-action-hover: #e62958;
+    --accent-action-soft: rgba(255, 51, 102, 0.12);
+
+    --accent-match: #34d399;
+    --accent-match-soft: rgba(52, 211, 153, 0.12);
+    --accent-attention: #fbbf24;
+    --accent-attention-soft: rgba(251, 191, 36, 0.12);
+    --accent-danger: #ff3366;
+    --accent-danger-soft: rgba(255, 51, 102, 0.12);
+    --accent-info: #60a5fa;
+    --accent-info-soft: rgba(96, 165, 250, 0.12);
+
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace;
+
+    --radius-sm: 0.4rem;
+    --radius-md: 0.6rem;
+    --radius-lg: 0.9rem;
+
+    --space-1: 0.5rem;
+    --space-2: 0.75rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --space-5: 2.5rem;
+
+    --content-max-width: 1100px;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -5,9 +45,9 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: #0d1117;
-    color: #e6edf3;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
 }
 
 #root {
@@ -18,43 +58,94 @@ a {
     color: inherit;
 }
 
+h1, h2, h3 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.page-shell {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4);
+    width: 100%;
+}
+
+.page-shell__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+
+    h1 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
+}
+
+.empty-state {
+    color: var(--text-muted);
+    padding: var(--space-4);
+    text-align: center;
+    background-color: var(--bg-surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+}
+
+.loading-state {
+    color: var(--text-muted);
+    padding: var(--space-4) 0;
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
 .button {
     padding: 0.65rem 1.25rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-sm);
     border: none;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
-    transition: opacity 0.15s ease, transform 0.1s ease;
+    transition: opacity 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
 
     &:active {
         transform: scale(0.98);
     }
 
     &:disabled {
-        opacity: 0.6;
+        opacity: 0.5;
         cursor: not-allowed;
         transform: none;
     }
 }
 
 .primary-button {
-    background: linear-gradient(135deg, #ff2d78 0%, #e01f66 100%);
+    background: var(--accent-action);
     color: #fff;
 
     &:hover:not(:disabled) {
-        opacity: 0.9;
+        background: var(--accent-action-hover);
     }
 }
 
 .secondary-button {
     background: transparent;
-    color: #e6edf3;
-    border: 1px solid #2a3348;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
 
     &:hover:not(:disabled) {
-        border-color: #ff2d78;
-        color: #ff2d78;
+        border-color: var(--accent-action);
+        color: var(--accent-action);
     }
 }

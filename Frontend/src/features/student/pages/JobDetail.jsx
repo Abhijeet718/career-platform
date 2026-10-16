@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
+import { FiMapPin } from 'react-icons/fi'
 import { getJobById, applyToJob } from '../../jobs/services/jobs.api'
 import { useToast } from '../../../shared/ToastContext'
 import '../jobs.scss'
@@ -52,19 +53,19 @@ const JobDetail = () => {
     }
 
     if (loading) {
-        return <main className="jobs-page"><p>Loading...</p></main>
+        return <main className="page-shell"><p className="loading-state">Loading...</p></main>
     }
 
     if (!job) return null
 
     return (
-        <main className="jobs-page">
+        <main className="page-shell">
             <button className="button secondary-button" onClick={() => navigate('/')}>← Back to jobs</button>
 
             <div className="job-detail">
                 <h1>{job.title}</h1>
                 <p className="job-detail__company">{job.postedBy?.companyName || job.postedBy?.username}</p>
-                {job.location && <p className="job-detail__location">📍 {job.location}</p>}
+                {job.location && <p className="job-detail__location"><FiMapPin size={14} /> {job.location}</p>}
 
                 <div className="job-card__skills">
                     {job.requiredSkills.map(skill => (

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { FiMapPin } from 'react-icons/fi'
 import { createJob, getMyJobs } from '../../jobs/services/jobs.api'
 import { useToast } from '../../../shared/ToastContext'
 import '../../student/jobs.scss'
@@ -65,8 +66,8 @@ const RecruiterHome = () => {
     }
 
     return (
-        <main className="jobs-page">
-            <div className="recruiter-header">
+        <main className="page-shell">
+            <div className="page-shell__header">
                 <h1>My Jobs</h1>
                 <button className="button primary-button" onClick={() => setShowForm(!showForm)}>
                     {showForm ? 'Cancel' : '+ Post New Job'}
@@ -97,15 +98,15 @@ const RecruiterHome = () => {
                 </form>
             )}
 
-            {loading && jobs.length === 0 && <p>Loading your jobs...</p>}
-            {!loading && jobs.length === 0 && <p className="jobs-empty">You haven't posted any jobs yet.</p>}
+            {loading && jobs.length === 0 && <p className="loading-state">Loading your jobs...</p>}
+            {!loading && jobs.length === 0 && <p className="empty-state">You haven't posted any jobs yet.</p>}
 
             <div className="jobs-list">
                 {jobs.map(job => (
                     <div key={job._id} className="job-card" onClick={() => navigate(`/recruiter/jobs/${job._id}/applicants`)}>
                         <h2>{job.title}</h2>
-                        <p className={`job-card__status job-card__status--${job.status}`}>{job.status}</p>
-                        {job.location && <p className="job-card__location">📍 {job.location}</p>}
+                        <p className={`job-status-badge job-status-badge--${job.status}`}>{job.status}</p>
+                        {job.location && <p className="job-card__location"><FiMapPin size={13} /> {job.location}</p>}
                         <div className="job-card__skills">
                             {job.requiredSkills.slice(0, 5).map(skill => (
                                 <span key={skill} className="skill-chip">{skill}</span>

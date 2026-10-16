@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { io } from 'socket.io-client'
+import { FiMapPin } from 'react-icons/fi'
 import { getMyApplications } from '../../jobs/services/jobs.api'
 import { useToast } from '../../../shared/ToastContext'
 import '../jobs.scss'
@@ -49,8 +50,7 @@ const MyApplications = () => {
         })
 
         socket.on('connect_error', () => {
-            // Live updates unavailable — the page still works fine via
-            // normal HTTP polling/refresh, just without instant pushes.
+            // Live updates unavailable — the page still works via normal HTTP.
         })
 
         return () => {
@@ -65,17 +65,19 @@ const MyApplications = () => {
     }
 
     if (loading && applications.length === 0) {
-        return <main className="jobs-page"><p>Loading your applications...</p></main>
+        return <main className="page-shell"><p className="loading-state">Loading your applications...</p></main>
     }
 
     return (
-        <main className="jobs-page">
-            <h1>My Applications</h1>
+        <main className="page-shell">
+            <div className="page-shell__header">
+                <h1>My Applications</h1>
+            </div>
 
             {applications.length === 0 && (
-                <p className="jobs-empty">
+                <p className="empty-state">
                     You haven't applied to any jobs yet.{' '}
-                    <span style={{ color: '#ff2d78', cursor: 'pointer' }} onClick={() => navigate('/')}>Browse open jobs →</span>
+                    <span style={{ color: 'var(--accent-action)', cursor: 'pointer' }} onClick={() => navigate('/')}>Browse open jobs →</span>
                 </p>
             )}
 
@@ -86,7 +88,7 @@ const MyApplications = () => {
                         <p className={`status-badge status-badge--${app.status}`}>
                             {STATUS_LABELS[app.status] || app.status}
                         </p>
-                        {app.job?.location && <p className="job-card__location">📍 {app.job.location}</p>}
+                        {app.job?.location && <p className="job-card__location"><FiMapPin size={13} /> {app.job.location}</p>}
                         <p className="match-chip">{app.matchScore}% match</p>
                     </div>
                 ))}

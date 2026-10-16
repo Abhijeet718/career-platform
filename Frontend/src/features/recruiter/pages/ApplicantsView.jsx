@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
+import { FiSearch } from 'react-icons/fi'
 import { getApplicantsForJob, updateApplicationStatus } from '../../jobs/services/jobs.api'
 import { useToast } from '../../../shared/ToastContext'
 import '../../student/jobs.scss'
@@ -60,16 +61,22 @@ const ApplicantsView = () => {
     }
 
     return (
-        <main className="jobs-page">
+        <main className="page-shell">
             <button className="button secondary-button" onClick={() => navigate('/')}>← Back to my jobs</button>
-            <h1>Applicants</h1>
+
+            <div className="page-shell__header">
+                <h1>Applicants</h1>
+            </div>
 
             <form className="applicant-filters" onSubmit={handleSearchSubmit}>
-                <input
-                    placeholder="Search by name or skill..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+                <div className="applicant-filters__search-wrap">
+                    <FiSearch size={14} />
+                    <input
+                        placeholder="Search by name or skill..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                     <option value="">All statuses</option>
                     {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -77,8 +84,8 @@ const ApplicantsView = () => {
                 <button className="button secondary-button">Search</button>
             </form>
 
-            {loading && applications.length === 0 && <p>Loading applicants...</p>}
-            {!loading && applications.length === 0 && <p className="jobs-empty">No applicants match these filters.</p>}
+            {loading && applications.length === 0 && <p className="loading-state">Loading applicants...</p>}
+            {!loading && applications.length === 0 && <p className="empty-state">No applicants match these filters.</p>}
 
             <div className="applicants-list">
                 {applications.map(app => (

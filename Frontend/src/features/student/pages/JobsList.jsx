@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { FiMapPin } from 'react-icons/fi'
 import { getAllJobs } from '../../jobs/services/jobs.api'
 import { useToast } from '../../../shared/ToastContext'
 import '../jobs.scss'
@@ -35,21 +36,23 @@ const JobsList = () => {
     }
 
     if (loading && jobs.length === 0) {
-        return <main className="jobs-page"><p>Loading jobs...</p></main>
+        return <main className="page-shell"><p className="loading-state">Loading jobs...</p></main>
     }
 
     return (
-        <main className="jobs-page">
-            <h1>Open Positions</h1>
+        <main className="page-shell">
+            <div className="page-shell__header">
+                <h1>Open Positions</h1>
+            </div>
 
-            {jobs.length === 0 && <p className="jobs-empty">No open jobs right now — check back soon.</p>}
+            {jobs.length === 0 && <p className="empty-state">No open jobs right now — check back soon.</p>}
 
             <div className="jobs-list">
                 {jobs.map(job => (
                     <div key={job._id} className="job-card" onClick={() => navigate(`/jobs/${job._id}`)}>
                         <h2>{job.title}</h2>
                         <p className="job-card__company">{job.postedBy?.companyName || job.postedBy?.username}</p>
-                        {job.location && <p className="job-card__location">📍 {job.location}</p>}
+                        {job.location && <p className="job-card__location"><FiMapPin size={13} /> {job.location}</p>}
                         <div className="job-card__skills">
                             {job.requiredSkills.slice(0, 5).map(skill => (
                                 <span key={skill} className="skill-chip">{skill}</span>
