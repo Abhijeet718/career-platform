@@ -1,76 +1,138 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { FiMapPin } from 'react-icons/fi'
-import { getAllJobs } from '../../jobs/services/jobs.api'
-import { useToast } from '../../../shared/ToastContext'
-import '../jobs.scss'
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { FiArrowUpRight, FiMapPin } from "react-icons/fi";
+import { getAllJobs } from "../../jobs/services/jobs.api";
+import { useToast } from "../../../shared/ToastContext";
+import "../jobs.scss";
 
 const JobsList = () => {
-    const [jobs, setJobs] = useState([])
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 })
-    const [loading, setLoading] = useState(true)
-    const navigate = useNavigate()
-    const { showToast } = useToast()
+  const [jobs, setJobs] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { showToast } = useToast();
 
-    const fetchJobs = async (page = 1) => {
-        setLoading(true)
-        try {
-            const data = await getAllJobs(page, pagination.limit)
-            setJobs(data.jobs)
-            setPagination(data.pagination)
-        } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to load jobs.', 'error')
-        } finally {
-            setLoading(false)
-        }
+  const fetchJobs = async (page = 1) => {
+    setLoading(true);
+    try {
+      const data = await getAllJobs(page, pagination.limit);
+      setJobs(data.jobs);
+      setPagination(data.pagination);
+    } catch (error) {
+      showToast(
+        error.response?.data?.message || "Failed to load jobs.",
+        "error",
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
-    useEffect(() => {
-        fetchJobs(1)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+  useEffect(() => {
+    fetchJobs(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    const goToPage = (page) => {
-        if (page < 1 || page > pagination.totalPages) return
-        fetchJobs(page)
-    }
+  const goToPage = (page) => {
+    if (page < 1 || page > pagination.totalPages) return;
+    fetchJobs(page);
+  };
 
-    if (loading && jobs.length === 0) {
-        return <main className="page-shell"><p className="loading-state">Loading jobs...</p></main>
-    }
-
+  if (loading && jobs.length === 0) {
     return (
-        <main className="page-shell">
-            <div className="page-shell__header">
-                <h1>Open Positions</h1>
+      <main className="page-shell">
+        <p className="loading-state">Loading jobs...</p>
+      </main>
+    );
+  }
+
+  return (
+    <main className="page-shell">
+      <div className="jobs-page-heading">
+        <div>
+          <span className="page-eyebrow">CAREER OPPORTUNITIES</span>
+          <h1>Find work that moves you forward.</h1>
+          <p className="page-description">
+            Explore roles matched to your skills and take the next step in your
+            career.
+          </p>
+        </div>
+        <div className="jobs-page-heading__count">
+          <strong>{pagination.total}</strong>
+          <span>open roles</span>
+        </div>
+      </div>
+
+      {jobs.length === 0 && (
+        <p className="empty-state">No open jobs right now — check back soon.</p>
+      )}
+
+      <div className="jobs-list">
+        {jobs.map((job) => (
+          <div
+            key={job._id}
+            className="job-card"
+            onClick={() => navigate(`/jobs/${job._id}`)}
+          >
+            <div className="job-card__top">
+              <span className="job-card__company-mark">
+                {(job.postedBy?.companyName || job.postedBy?.username || "C")
+                  .slice(0, 1)
+                  .toUpperCase()}
+              </span>
+              <span className="job-card__open-label">Open position</span>
             </div>
-
-            {jobs.length === 0 && <p className="empty-state">No open jobs right now — check back soon.</p>}
-
-            <div className="jobs-list">
-                {jobs.map(job => (
-                    <div key={job._id} className="job-card" onClick={() => navigate(`/jobs/${job._id}`)}>
-                        <h2>{job.title}</h2>
-                        <p className="job-card__company">{job.postedBy?.companyName || job.postedBy?.username}</p>
-                        {job.location && <p className="job-card__location"><FiMapPin size={13} /> {job.location}</p>}
-                        <div className="job-card__skills">
-                            {job.requiredSkills.slice(0, 5).map(skill => (
-                                <span key={skill} className="skill-chip">{skill}</span>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {pagination.totalPages > 1 && (
-                <div className="pagination">
-                    <button className="pagination__btn" disabled={pagination.page <= 1 || loading} onClick={() => goToPage(pagination.page - 1)}>Previous</button>
-                    <span className="pagination__label">Page {pagination.page} of {pagination.totalPages}</span>
-                    <button className="pagination__btn" disabled={pagination.page >= pagination.totalPages || loading} onClick={() => goToPage(pagination.page + 1)}>Next</button>
-                </div>
+            <h2>{job.title}</h2>
+            <p className="job-card__company">
+              {job.postedBy?.companyName || job.postedBy?.username}
+            </p>
+            {job.location && (
+              <p className="job-card__location">
+                <FiMapPin size={13} /> {job.location}
+              </p>
             )}
-        </main>
-    )
-}
+            <div className="job-card__skills">
+              {job.requiredSkills.slice(0, 5).map((skill) => (
+                <span key={skill} className="skill-chip">
+                  {skill}
+                </span>
+              ))}
+            </div>
+            <span className="job-card__link">
+              View role details <FiArrowUpRight size={15} />
+            </span>
+          </div>
+        ))}
+      </div>
 
-export default JobsList
+      {pagination.totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="pagination__btn"
+            disabled={pagination.page <= 1 || loading}
+            onClick={() => goToPage(pagination.page - 1)}
+          >
+            Previous
+          </button>
+          <span className="pagination__label">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <button
+            className="pagination__btn"
+            disabled={pagination.page >= pagination.totalPages || loading}
+            onClick={() => goToPage(pagination.page + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </main>
+  );
+};
+
+export default JobsList;
