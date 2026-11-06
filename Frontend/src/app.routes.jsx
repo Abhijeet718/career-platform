@@ -10,36 +10,60 @@ import Profile from "./features/student/pages/Profile";
 import DsaTracker from "./features/dsa/pages/DsaTracker";
 
 export const router = createBrowserRouter([
-    {
-        path: "/login",
-        element: <Login />
-    },
-    {
-        path: "/register",
-        element: <Register />
-    },
-    {
-        path: "/",
-        element: <Protected><Home /></Protected>
-    },
-    {
-        path: "/jobs/:jobId",
-        element: <Protected allowedRoles={['student']}><JobDetail /></Protected>
-    },
-    {
-        path: "/applications",
-        element: <Protected allowedRoles={['student']}><MyApplications /></Protected>
-    },
-    {
-        path: "/profile",
-        element: <Protected allowedRoles={['student']}><Profile /></Protected>
-    },
-    {
-        path: "/dsa",
-        element: <Protected><DsaTracker /></Protected>
-    },
-    {
-        path: "/recruiter/jobs/:jobId/applicants",
-        element: <Protected allowedRoles={['recruiter']}><ApplicantsView /></Protected>
-    }
-])
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/",
+    element: (
+      <Protected>
+        <Home />
+      </Protected>
+    ),
+  },
+  {
+    path: "/jobs/:jobId",
+    element: (
+      <Protected allowedRoles={["student"]}>
+        <JobDetail />
+      </Protected>
+    ),
+  },
+  {
+    path: "/applications",
+    element: (
+      <Protected allowedRoles={["student"]}>
+        <MyApplications />
+      </Protected>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <Protected allowedRoles={["student"]}>
+        <Profile />
+      </Protected>
+    ),
+  },
+  {
+    path: "/dsa",
+    element: (
+      <Protected>
+        <DsaTracker />
+      </Protected>
+    ),
+  },
+  {
+    path: "/recruiter/jobs/:jobId/applicants",
+    element: (
+      <Protected allowedRoles={["recruiter"]}>
+        <ApplicantsView />
+      </Protected>
+    ),
+  },
+]);
