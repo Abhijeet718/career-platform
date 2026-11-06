@@ -1,6 +1,6 @@
-import React from 'react'
-import JobsList from './JobsList'
+import React from "react";
+import JobsList from "./JobsList";
 
-const StudentHome = () => <JobsList />
+const StudentHome = () => <JobsList />;
 
-export default StudentHome
+export default StudentHome;
