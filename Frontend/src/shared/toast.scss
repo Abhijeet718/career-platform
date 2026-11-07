@@ -1,51 +1,54 @@
 .toast-container {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    max-width: 360px;
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: min(390px, calc(100vw - 2rem));
 }
-
 .toast {
-    padding: 0.85rem 1.1rem;
-    border-radius: 0.75rem;
-    font-size: 0.9rem;
-    color: #e6edf3;
-    background-color: #1c2230;
-    border: 1px solid #2a3348;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    cursor: pointer;
-    animation: toast-in 0.2s ease-out;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    max-height: 160px;
-    overflow-y: auto;
-
-    &--error {
-        border-color: #ff2d78;
-        background-color: rgba(255, 45, 120, 0.12);
-    }
-
-    &--success {
-        border-color: #2ecc71;
-        background-color: rgba(46, 204, 113, 0.12);
-    }
-
-    &--info {
-        border-color: #2a3348;
-    }
+  padding: 0.9rem 1.05rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 550;
+  color: var(--text-primary);
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-toast);
+  cursor: pointer;
+  animation: toast-in 0.2s ease-out;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-height: 160px;
+  overflow-y: auto;
+  &--error {
+    border-left: 4px solid var(--accent-danger);
+    background: var(--accent-danger-soft);
+  }
+  &--success {
+    border-left: 4px solid var(--accent-match);
+    background: var(--accent-match-soft);
+  }
+  &--info {
+    border-left: 4px solid var(--accent-info);
+  }
 }
-
 @keyframes toast-in {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 520px) {
+  .toast-container {
+    right: 1rem;
+    bottom: 1rem;
+    width: calc(100vw - 2rem);
+  }
 }
